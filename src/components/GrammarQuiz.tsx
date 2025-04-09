@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button, message, Typography, Radio, Space, Table } from 'antd';
-import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
+import { UploadOutlined, DownloadOutlined, FileExcelOutlined } from '@ant-design/icons';
 import type { RadioChangeEvent } from 'antd';
 import { grammarApi } from '../services/api';
 import * as XLSX from 'xlsx';
@@ -183,6 +183,46 @@ const GrammarQuiz: React.FC = () => {
     }
   };
 
+  const downloadTemplate = () => {
+    try {
+      // Create template data
+      const templateData = [
+        {
+          'No.': 1,
+          'Training content': 'Grammar',
+          'Question': 'What is the correct sentence?',
+          'Answer': 'A',
+          'Answer Option A': 'This is a correct sentence.',
+          'Answer Option B': 'This are a correct sentence.',
+          'Answer Option C': 'This is an correct sentence.',
+          'Answer Option D': 'This is correct sentence.'
+        }
+      ];
+      
+      const worksheet = XLSX.utils.json_to_sheet(templateData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Quiz Template');
+      
+      // Set column widths
+      worksheet['!cols'] = [
+        { width: 5 },  // No.
+        { width: 15 }, // Training content
+        { width: 30 }, // Question
+        { width: 8 },  // Answer
+        { width: 25 }, // Option A
+        { width: 25 }, // Option B
+        { width: 25 }, // Option C
+        { width: 25 }  // Option D
+      ];
+      
+      XLSX.writeFile(workbook, 'quiz_template.xlsx');
+      message.success('Quiz template downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading template:', error);
+      message.error('Failed to download quiz template');
+    }
+  };
+
   const startQuiz = () => {
     setShowQuiz(true);
   };
@@ -232,11 +272,18 @@ const GrammarQuiz: React.FC = () => {
         <div className="text-center">
           <Title level={4}>Upload Quiz Questions</Title>
           <Paragraph className="text-gray-600 mb-4">
-            Please upload an Excel file containing quiz questions in the following format:
+            Please download and use the template below to create your quiz questions.
             <br />
-            Question | Answer Option A | Answer Option B | Answer Option C | Answer Option D | CorrectAnswer | Explanation
+            The template includes columns for: No., Training Content, Question, Answer, Option A, Option B, Option C, Option D
           </Paragraph>
           <Space direction="vertical" className="w-full" size="large">
+            <Button 
+              icon={<FileExcelOutlined />}
+              onClick={downloadTemplate}
+              className="mb-4"
+            >
+              Download Quiz Template
+            </Button>
             <input
               type="file"
               ref={fileInputRef}
