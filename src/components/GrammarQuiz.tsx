@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button, message, Typography, Radio, Space, Table } from 'antd';
-import { UploadOutlined, LoadingOutlined, DownloadOutlined } from '@ant-design/icons';
+import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 import type { RadioChangeEvent } from 'antd';
 import { grammarApi } from '../services/api';
 import * as XLSX from 'xlsx';

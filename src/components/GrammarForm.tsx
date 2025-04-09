@@ -1,4 +1,4 @@
-import React, { useState, useRef, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 import { Tabs, Input, Button, Upload, message } from 'antd';
 import { UploadOutlined, LoadingOutlined } from '@ant-design/icons';
 import type { TabsProps } from 'antd';
