@@ -1,86 +1,92 @@
-import React, { useState, KeyboardEvent } from 'react';
-import { Tabs, Input, Button, Upload, message } from 'antd';
-import { UploadOutlined, LoadingOutlined } from '@ant-design/icons';
-import type { TabsProps } from 'antd';
-import GrammarQuiz from './GrammarQuiz';
+import React, { useState, KeyboardEvent } from "react";
+import { Tabs, Input, Button, message } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import type { TabsProps } from "antd";
+import GrammarQuiz from "./GrammarQuiz";
 
 const { TextArea } = Input;
 
 interface GrammarFormProps {
-  onSubmit: (data: FormData | { text: string; proper_nouns: string }, tab: string) => Promise<void>;
+  onSubmit: (
+    data: FormData | { text: string; proper_nouns: string },
+    tab: string
+  ) => Promise<void>;
   loading: boolean;
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
-const GrammarForm: React.FC<GrammarFormProps> = ({ 
-  onSubmit, 
-  loading, 
-  activeTab, 
-  setActiveTab 
+const GrammarForm: React.FC<GrammarFormProps> = ({
+  onSubmit,
+  loading,
+  activeTab,
+  setActiveTab,
 }) => {
-  const [text, setText] = useState<string>('');
+  const [text, setText] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
-  const [properNouns, setProperNouns] = useState<string>('');
+  const [properNouns, setProperNouns] = useState<string>("");
 
   const handleTextSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) {
-      message.warning('Please enter some text to check.');
+      message.warning("Please enter some text to check.");
       return;
     }
-    
+
     const payload = {
       text: text.trim(),
-      proper_nouns: properNouns.trim()
+      proper_nouns: properNouns.trim(),
     };
-    onSubmit(payload, 'text');
+    onSubmit(payload, "text");
   };
-  
+
   const handleFileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      message.warning('Please select a file to upload.');
+      message.warning("Please select a file to upload.");
       return;
     }
-    
+
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
     // Convert comma-separated string to array and remove empty values
-    const properNounsArray = properNouns.split(',').map(noun => noun.trim()).filter(Boolean);
-    formData.append('proper_nouns', JSON.stringify(properNounsArray));
-    onSubmit(formData, 'file');
+    const properNounsArray = properNouns
+      .split(",")
+      .map((noun) => noun.trim())
+      .filter(Boolean);
+    formData.append("proper_nouns", JSON.stringify(properNounsArray));
+    onSubmit(formData, "file");
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      
+
       if (text.trim()) {
         const payload = {
           text: text.trim(),
-          proper_nouns: properNouns.trim()
+          proper_nouns: properNouns.trim(),
         };
-        onSubmit(payload, 'text');
+        onSubmit(payload, "text");
       } else {
-        message.warning('Please enter some text to check.');
+        message.warning("Please enter some text to check.");
       }
     }
   };
 
-  const handleFileChange = (info: any) => {
-    if (info.file.status === 'done') {
-      setFile(info.file.originFileObj);
-      message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const selectedFile = files[0];
+      setFile(selectedFile);
+      message.success(`${selectedFile.name} file selected successfully`);
     }
   };
 
-  const items: TabsProps['items'] = [
+  const items: TabsProps["items"] = [
     {
-      key: 'text',
-      label: 'Text Input',
+      key: "text",
+      label: "Text Input",
       children: (
         <form onSubmit={handleTextSubmit} className="space-y-6">
           <div>
@@ -97,7 +103,7 @@ const GrammarForm: React.FC<GrammarFormProps> = ({
               className="w-full"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Technical Terms/Proper Nouns (optional)
@@ -113,7 +119,7 @@ const GrammarForm: React.FC<GrammarFormProps> = ({
               These terms will be preserved in their original form.
             </p>
           </div>
-          
+
           <Button
             type="primary"
             htmlType="submit"
@@ -121,37 +127,42 @@ const GrammarForm: React.FC<GrammarFormProps> = ({
             disabled={!text.trim()}
             className="w-full md:w-auto"
           >
-            {loading ? 'Checking...' : 'Check Grammar'}
+            {loading ? "Checking..." : "Check Grammar"}
           </Button>
         </form>
       ),
     },
     {
-      key: 'file',
-      label: 'File Upload',
+      key: "file",
+      label: "File Upload",
       children: (
         <form onSubmit={handleFileSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload a document (.txt, .docx)
             </label>
-            <Upload
-              accept=".txt,.docx"
-              maxCount={1}
-              onChange={handleFileChange}
-              disabled={loading}
-              className="w-full"
-              beforeUpload={() => false} // Prevent auto upload
-            >
-              <Button icon={<UploadOutlined />} disabled={loading}>
-                Select File
-              </Button>
-            </Upload>
+            <div className="flex items-center space-x-2">
+              <input
+                type="file"
+                accept=".txt,.docx"
+                onChange={handleFileChange}
+                disabled={loading}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
+              />
+              {file && (
+                <span className="text-sm text-gray-600">{file.name}</span>
+              )}
+            </div>
             <p className="mt-1 text-sm text-gray-500">
               Maximum file size: 10MB
             </p>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Technical Terms/Proper Nouns (optional)
@@ -167,7 +178,7 @@ const GrammarForm: React.FC<GrammarFormProps> = ({
               These terms will be preserved in their original form.
             </p>
           </div>
-          
+
           <Button
             type="primary"
             htmlType="submit"
@@ -176,14 +187,14 @@ const GrammarForm: React.FC<GrammarFormProps> = ({
             icon={loading ? <LoadingOutlined /> : undefined}
             className="w-full md:w-auto"
           >
-            {loading ? 'Uploading & Checking...' : 'Check Grammar'}
+            {loading ? "Uploading & Checking..." : "Check Grammar"}
           </Button>
         </form>
       ),
     },
     {
-      key: 'quiz',
-      label: 'Grammar Quiz',
+      key: "quiz",
+      label: "Grammar Quiz",
       children: <GrammarQuiz />,
     },
   ];
